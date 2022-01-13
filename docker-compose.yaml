@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  api-gateway:
+    image: nginx:mainline-alpine
+    container_name: api-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/html:/var/www/html
+      - ./nginx:/etc/nginx/conf.d
+    depends_on:
+      - node-api
+    networks:
+      - app-network
+  node-api:
+    image: marcosadsj/node-api
+    build:
+      context: .
+      dockerfile: Dockerfile 
+    ports:
+      - "3333:3333"
+    container_name: node-api
+    restart: unless-stopped
+    networks:
+      - app-network
+    depends_on:
+      - mysql
+  mysql:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: node-nginx-db
+      MYSQL_USER: node-nginx-user
+      MYSQL_PASSWORD: node-nginx-password
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge
