@@ -22,7 +22,9 @@ services:
     ports:
       - "3333:3333"
     container_name: node-api
-    restart: unless-stopped
+    entrypoint: dockerize -wait tcp://mysql:3306 -timeout 3s node index.js
+    restart: always
+    tty: true
     networks:
       - app-network
     depends_on:
